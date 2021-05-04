@@ -1,5 +1,7 @@
 import pandas as pd 
-
+collection_factor = 3
+transfer_factor = 1
+distribution_factor = 2 
 
 file_name ='Large.xlsx'
 class parcel():
@@ -16,6 +18,7 @@ class parcel():
 		flow_copy = self.flow
 		cost_copy = self.package_cost
 		cost_copy = cost_copy.take([hub - 1 for hub in hubs])
+		cost_copy = cost_copy.drop(columns= 'Unnamed: 0')
 		print(cost_copy)
 		for i in range(1,self.cities):
 			if i in hubs:
@@ -29,11 +32,16 @@ class parcel():
 			flow_copy[nearest_hub] = flow_copy[i]+flow_copy[nearest_hub]
 			flow_copy = flow_copy.drop(columns = i)
 		print(index)
-		# for i in range(self.cities):
-		# 	to_hub = index[i]
-		# 	flow_copy.iloc[i]
+		flow_copy = flow_copy.drop(columns = 'Unnamed: 0')
+		print(self.cities)
+		for i in range(self.cities - 1):
+			print('index = ' + str(i))
+			print(flow_copy.iloc[i])
+			to_hub = index[i+1]
+			print(cost_copy[to_hub])
 
-		print(flow_copy.iloc[14])
+
+		print(flow_copy)
 
 
 
@@ -42,6 +50,3 @@ test = parcel(file_name)
 test.calculate_cost([1,2,3,9])
 
 
-print(test.package_cost.loc[test.package_cost[14] > 0, 14].idxmin())
-print(test.package_cost[14])
-print(test.package_cost)
