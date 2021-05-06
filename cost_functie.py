@@ -18,8 +18,8 @@ class parcel():
 	def calculate_cost(self,hubs):
 		cost = 0
 		index = {}
-		flow_copy = self.flow
-		cost_copy = self.package_cost
+		flow_copy = self.flow.copy(deep=True)
+		cost_copy = self.package_cost.copy(deep=True)
 		cost_copy = cost_copy.take([hub for hub in hubs])
 		for i in range(1,self.cities):
 			if i+1 in hubs:
@@ -36,10 +36,10 @@ class parcel():
 		for i in range(self.cities - 1):
 			# print('index = ' + str(i))
 			flowss = list(flow_copy.iloc[i])
-			# print(flowss)
+			print(flowss)
 			to_hub = index[i+1] - 1
 			prices = list(cost_copy[to_hub])
-			# print(prices)
+			print(prices)
 			total_packages = sum(flowss)
 			transfer_cost = sum([int(flowss[i])*int(prices[i]) for i in range(len(flowss))])
 			distribution_cost = self.package_cost[to_hub][i+1]*total_packages*distribution_factor
@@ -55,12 +55,17 @@ class parcel():
 
 
 test = parcel(file_name) 
-print(test.calculate_cost([3]))
-# average = list(test.package_cost.mean().sort_values().index)[1:]
+print(test.calculate_cost([7,10]))
+print(test.calculate_cost([7,10]))
+print(test.calculate_cost([7,10]))
+# average = list(test.package_cost.mean().sort_values().index)[:]
+# print(average)
 # y = []
 # x = [] 
-# for i in range(1,15):
+# for i in range(1,13):
 # 	x.append(i)
+# 	print(i)
+# 	print(average[:i])
 # 	y.append(test.calculate_cost(average[:i]))
 
 # plt.plot(x,y)
