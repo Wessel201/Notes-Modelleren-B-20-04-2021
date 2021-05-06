@@ -20,19 +20,17 @@ class parcel():
 		index = {}
 		flow_copy = self.flow
 		cost_copy = self.package_cost
-		print(cost_copy)
 		cost_copy = cost_copy.take([hub for hub in hubs])
-		print(cost_copy)
 		for i in range(1,self.cities):
-			if i in hubs:
+			if i+1 in hubs:
 				index[i] = i
 				cost+= self.hub_cost[i-1]
 				continue
 			nearest_hub = cost_copy.loc[cost_copy[i] > 0 , i].idxmin()
 			cost += cost_copy[i][nearest_hub] * flow_copy[i].sum()*collection_factor
-			nearest_hub = nearest_hub
+			nearest_hub = nearest_hub 
 			index[i] = nearest_hub
-			flow_copy[nearest_hub] = flow_copy[i]+flow_copy[nearest_hub]
+			flow_copy[nearest_hub-1] = flow_copy[i]+flow_copy[nearest_hub-1]
 			flow_copy = flow_copy.drop(columns = i)
 		flow_copy = flow_copy.drop(columns = 0)
 		for i in range(self.cities - 1):
@@ -56,9 +54,8 @@ class parcel():
 
 
 
-
 test = parcel(file_name) 
-print(test.calculate_cost([1,3,6]))
+print(test.calculate_cost([3]))
 # average = list(test.package_cost.mean().sort_values().index)[1:]
 # y = []
 # x = [] 
