@@ -36,10 +36,8 @@ class parcel():
 		for i in range(self.cities - 1):
 			# print('index = ' + str(i))
 			flowss = list(flow_copy.iloc[i])
-			print(flowss)
 			to_hub = index[i+1] - 1
 			prices = list(cost_copy[to_hub])
-			print(prices)
 			total_packages = sum(flowss)
 			transfer_cost = sum([int(flowss[i])*int(prices[i]) for i in range(len(flowss))])
 			distribution_cost = self.package_cost[to_hub][i+1]*total_packages*distribution_factor
@@ -55,18 +53,4 @@ class parcel():
 
 
 test = parcel(file_name) 
-print(test.calculate_cost([7,10]))
-print(test.calculate_cost([7,10]))
-print(test.calculate_cost([7,10]))
-# average = list(test.package_cost.mean().sort_values().index)[:]
-# print(average)
-# y = []
-# x = [] 
-# for i in range(1,13):
-# 	x.append(i)
-# 	print(i)
-# 	print(average[:i])
-# 	y.append(test.calculate_cost(average[:i]))
-
-# plt.plot(x,y)
-# plt.show()
+print(test.calculate_cost([3]))
