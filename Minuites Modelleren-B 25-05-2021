@@ -1,0 +1,40 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+
+\title{Minuites Modelleren 25-05-2021}
+\author{Severijn Wiechers}
+\date{May 2021}
+
+\begin{document}
+
+\maketitle
+\section{Attendance}
+\begin{itemize}
+    \item Wessel was still in the train so he couldn't be in the meeting
+    \item Dyami had a doctors appointment but was in the meeting for the majority of the first hour
+    \item arrt and Severijn were present the entire meeting
+\end{itemize}
+
+\section{what do we need for the draft report}
+\begin{itemize}
+    \item The complete intuitive algorithm. Here we will write down all the made algorithms and the conclusion of the chosen hubs.
+    \item The answer to the problem via the ilp solver
+
+\end{itemize}
+
+
+\section{What have we done today}
+\begin{itemize}
+    \item By combining the results of all the intuitive algorithms we think that the combination of the hubs [6, 14, 8] will have one of the lowest possible costs at 144532 euros in total
+    \item We still need to get an answer out of the ILP solver, Bart will try to do that today
+\end{itemize}
+
+\section{What do we still have to do}
+\begin{itemize}
+    \item we still have to let the cost function show the different cities that are connected per hub
+\end{itemize}
+\end{document}
+
+
+Hoe verhoud de ilp tot intuitief
+crititische blik op de uitkomsten van het algoritme
