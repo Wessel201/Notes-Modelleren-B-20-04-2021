@@ -1,0 +1,52 @@
+\documentclass[11pt]{article} % use larger type; default would be 10pt
+\usepackage{amsmath}
+\usepackage[utf8]{inputenc} % set input encoding (not needed with XeLaTeX)
+
+\usepackage{geometry} % to change the page dimensions
+\geometry{a4paper} % or letterpaper (US) or a5paper or....
+
+\title{ILP of Parcel Delivery}
+\author{Bart Stolk}
+
+\begin{document}
+\maketitle
+
+\section{Input}
+\begin{align*}
+c_{ij} &= \text{cost between city i and j}  \quad i,j=1,\ldots,N \\
+w_{ij} &= \text{flow between city i and j} \quad i,j=1,\ldots,N \\
+f_{i} &= \text{cost to turn city i into a hub} \quad i=1,\ldots,N \\
+\chi &= \text{collection cost multiplier} \\
+\alpha &= \text{transfer cost multiplier} \\
+\delta &= \text{distribution cost multiplier} \\
+\end{align*}
+
+\section{Variables}
+\begin{align*}
+h_{i} &=
+\begin{cases} 
+1, & \text{if city i is a hub} \quad i=1,2,\ldots,N \\ 
+0, & \text{otherwise} 
+\end{cases} \\ 
+e_{ij} &=
+\begin{cases} 
+1, & \text{if there is and edge between city i and j} \quad i,j=1,2,\ldots,N \\ 
+0, & \text{otherwise} 
+\end{cases} \\
+n_{ij} &= 
+\begin{cases} 
+0, & \text{if } h_{i} = 1 \text{ and } h_{j}=1 \quad i,j=1,2,\ldots,N \\ 
+e_{ij}, & \text{otherwise}
+\end{cases}
+\end{align*}
+
+\section{Objective function}
+$$min\,z=\sum^N_{i=1}\sum^N_{j=1}\sum^N_{k=1}\sum^N_{l=1}(w_{ij}(\chi c_{ik}e_{ik}+(\alpha c_{kl}+\delta c_{lj})e_{lj})) + \sum^N_{i=1}f_{i}h_{i}$$
+s.t.
+\begin{align*}
+e_{ij}-h_{i}-h_{j} &= 0 \quad i,j=1,2,\ldots,N \text{ for } i \ne j \\
+e_{ii}-h_{i} &= 0 \quad i=1,2,\ldots,N \\
+\sum^N_{j=i}n_{ij} &= 1 \quad i=1,2,\ldots,N \\
+\sum^N_{i=1}h_{i} &\geq 1 \quad i=1,2,\ldots,N
+\end{align*}
+\end{document}
