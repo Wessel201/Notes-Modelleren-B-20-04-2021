@@ -26,14 +26,58 @@
 
 \newpage
 \section{Introduction}
-Reducing costs is a valuable tool for any package delivery cooperation to stay relevant and make profits. This report will try to show how it is possible to create an algorithm that gives an optimum 
+
+% Reducing costs is a valuable tool for any package delivery cooperation to stay relevant and make profits. This report will try to show how it is possible to create an algorithm that gives an optimum case of hubs such that the total cost is minimized % we moeten de hoofdvraag nog even correct opstellen.
+
+Reducing costs is a valuable tool for any package delivery cooperation to stay relevant and make profits. Hereby, algorithms are a useful and necessary tool to optimize a given data set. In this case the goal of the report is to find an algorithm to minimize the cost of a package delivery company. Hereby a data set is used where the different transfer, collection and distribution costs are given per city. The objective of the algorithm is to find the cities where hubs should be build such that the total cost of sending and receiving packages can be brought down to a minimum. An important restraint in this matter is that packages can only move between hubs and cities and in particular not directly between cities themselves. 
+
+Since this type of optimization problem is a common practice for companies, there already exists an ILP solver which can give the exact hubs for which have the lowest total cost, However, it has shown that these solvers can take up and lot op time and processing power. Therefore it is preferable to get an idea for which routes and hubs will give the best, or at least a proper solution to the problem. This will be done by creating different intuitive algorithms which will, if done correctly, give similar results using different methods.
+
+In the first chapter the intuitive algorithms will be explained along with the function which is used to calculate the total costs of choosing a specific combination of hubs. Thereafter, the chapter will set forth the input and result of the ILP Solver. The section in chapter 4 will focus on a reflection between the result of the intuitive algorithm and the solution of the ILP solver. In the following chapter multiple expansions of the problem and intuitive algorithm will be given such that a better result is obtained. Finally, the last chapter will contain a conclusion of the report.
+
+
+
+
+
+
 \newpage
 \section{Intuitive Algorithm}
+As mentioned in the introduction, it can be useful to use an intuitive algorithm in stead of a direct solver for the problem. With a self made script it is possible to get a feel for the cities in which building a hub can have a major impact on reducing the cost of the project. 
+Before a code can be written that tries to optimize the building of hubs in cities, it is necessary to have a solid view of the costs that a specific combination of hubs will bring forth. Therefore a cost-function is written that will give a total cost as output with a combination of hubs as input. 
+
+
 
     \subsection{Calculating the cost for multiple hubs}
+        To calculate the cost of using specific hubs we first choose a way to determine connections from hubs to cities. The most intuitive way to determine those connections was to link each city with the hub that was cheapest to collect and distribute to. Intuitively this made sense as it probably the closest. If we take for example the Netherlands this would mean that a packet send from Groningen would be picked up by a hub close to Groningen and not by a hub in for example Maastricht. So the first step in the cost function algorithm was to go trough the list of cities and determine which hub from the list of inputted hubs was cheapest to collect from for each city. When this connection is determined the sum of the list multiplied by the collection factor is added to the cost and the the amount of packages are added to the packages of the hub city. This connection between the city and collection hub was stored in memory as it would be used later to determine transfers and delivery. As soon as this first step is complete we end up with a Dataframe with as columns the hub cities and rows the packages that need to go to each city. The next step is to go row by row and look up what connection that city had with which hub and transfer all the packages of that row to the correct hub again multiplying the amount times the correct cost associated with transfering from hub to hub. Then the total of that row at the correct hub will be delivered to the city and thus multiplying the total number of packages by the cost to deliver from that hub to the city and the delivery factor. Once that is done for all rows, all packages will be delivered. Now we only need to add the cost of building the hubs and we have the total cost of using specific hubs. 
+        
+        
     \subsection{The different algorithms used}
-    \subsection{Result of the combined algorithms}
+    
+    After obtaining a function which calculates the cost of assigning hubs to cities, an intuitive algorithm can be made which tries to give an approximation of the combination of hubs that will result in the lowest possible amount of money that the company will have to spend when moving packages. 
+    Since the intuitive algorithms are inherently less accurate than a standardized solver, the di
+    
+    
+    
+\subsubsection{Hubs self-flow}
+Transport to the same node is free if the node is a hub. This algorithm will be looking at the node with the most flow of parcels to itself and make a hub of this node. For this we will use the Large data assignment.
+\paragraph{The Algorithm:}
+Node 14 has the most flow of parcels to itself (181), so this becomes our first hub. There is only one hub so all other nodes will be connected to this hub. The Total cost will be calculated using our cost-function in python.
+The total cost is 182725,0.
+
+The second node with the most flow of parcels to itself is node 2 with 39 parcels. Each node will be connected to the hub with the least cost to transport it there. For example for node 11 it cost 11 dollars to transport it to hub 14 and 27 dollars to transport it to hub 2, so node 11 will be connected with hub 14.The total cost is 163586
+
+The third node with the most flow of parcels to itself is node 15 with 26 parcels. What will happen if this node becomes a hub? As before the nodes will be connected to the hub with the least cost to transport it there. The total cost is 169342
  
+If there are two nodes with the same amount of parcels to itself the algorithm will choose the node with the most incoming parcels. This algorithm will go through all nodes until the total cost by opening an extra hub becomes more expensive then the cheapest situation
+
+\paragraph{Conclusion}
+The cheapest situation here is where there are 5 hubs in nodes 2,6,13,14 and 15. We connect each node with the hub where the cost to transport a parcel is the lowest. The total cost in this situation would be 161521. One can easily see that node 14 must become a hub as it has the most flow of parcels to itself (181). In the following subsections we will be looking at the results of the other algorithms and combine those to see if there are similarities.
+    
+
+    
+    
+    \subsection{Result of the combined algorithms}
+
  
 \newpage  
 \section{The ILP solver}
@@ -43,6 +87,7 @@ We are given a set N of nodes where we can locate a hub. The cost of opening a h
 
 \newpage
 \section{Expanded intuitive algorithm}
+
 
 \newpage
 \section{Conclusion}
