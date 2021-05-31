@@ -1,54 +1,77 @@
-from pulp import *
 import pandas as pd
-import cplex 
+import pulp as p
+import numpy as np
+#Input
 col = 3
 trns = 1
-dist = 2 
-N = range(15)
-file_name ='Large.xlsx'
-xls = pd.ExcelFile(file_name)
+dist = 2
+cities = range(15)
+
+file = 'Large.xlsx'
+xls = pd.ExcelFile(file)
+
 flow = pd.read_excel(xls, 'w')
-p_cost = pd.read_excel(xls, 'c')
-hub_cost =[13530] + list(pd.read_excel(xls, 'f')[13530])
 flow = flow.values[:,1:]
-p_cost = p_cost.values[:,1:]
 
-model = LpProblem('ParcelTransport', sense=LpMinimize)
+cost = pd.read_excel(xls, 'c')
+cost = cost.values[:,1:]
 
-isHub = LpVariable.dicts('isHub', N, 0, 1, LpBinary)
+hub_cost = pd.read_excel(xls, 'f')
+hub_cost = hub_cost.values[:,1]
+hub_cost = np.append([13530], hub_cost)
 
+#Creating the model
+Parcel = p.LpProblem('ParcelDelivery', p.LpMinimize)
 
-hasEdge = LpVariable.dicts("hasEdge", [(i,j) for i in N
-                                       for j in N],
-                           0, 1, LpBinary)
-y = LpVariable.dicts("y", [(i,j) for i in N
-                                       for j in N],
-                           0, 1, LpBinary)
+#Variables
+h = p.LpVariable.dicts('isHub', cities, cat='Binary')
 
-x = LpVariable.dicts("x", [(i,j) for i in N
-                                       for j in N],
-                           0, 1, LpBinary)
+e = p.LpVariable.dicts('hasEdge', ((i,j) for i in cities
+                                         for j in cities), cat='Binary')
 
-model += lpSum(flow[i][j]*(col*p_cost[i][k]*hasEdge[i,k]+
-                           (trns*p_cost[k][l]+dist*p_cost[l][j])*hasEdge[l,j])
-               for i in N
-               for j in N
-               for k in N
-               for l in N)
-+ lpSum(hub_cost[i]*isHub[i] for i in N)
+x = p.LpVariable.dicts('Helper1', ((i,j) for i in cities
+                                         for j in cities), cat='Binary')
 
-for i in N:
-    model += hasEdge[(i,i)] - isHub[i] == 0
-    model += lpSum(y[(i,j)] for j in N) == 1
-    model += lpSum(x[(i,j)] for j in N) == 1
-    for j in N:
-        model += y[(i,j)] <= 1-isHub[i]
-        model += y[(i,j)] <= hasEdge[(i,j)]
-        model += y[(i,j)] >= hasEdge[(i,j)] - isHub[i]
-        model += x[(i,j)] <= y[(i,j)]
-        model += x[(i,j)] <= isHub[j]
-        model += x[(i,j)] >= y[(i,j)] + isHub[j] - 1
-model += lpSum(isHub[i] for i in N) >= 1
+#Objective function
 
-sol = model.solve(CPLEX_CMD())
-print(LpStatus[sol])
+Parcel += p.lpSum(flow[i][j]*(col*cost[i][k]*e[(i,k)]+
+                           (trns*cost[k][l]+dist*cost[l][j])*e[(l,j)])
+               for i in cities
+               for j in cities
+               for k in cities
+               for l in cities) + p.lpSum(hub_cost[i]*h[i] for i in cities)
+#col*cost[i][k]*e[(i,k)] and (trns*cost[k][l]+dist*cost[l][j])*e[(l,j)] are not
+#dependent on eachother. So the first part gets added whenever e[(i,k)]=1 and
+#the second part whenever e[(l,j)] = 1. While it is only supposed to happen
+#when both of them are 1.
+
+#Constraints
+for i in cities:
+    Parcel += e[(i,i)] - h[i] == 0
+    #Hubs are connected to themselves, cities are not
+    
+    Parcel += p.lpSum(e[(i,j)] for j in cities) >= 1
+    #Every city is collected to at least one other city.
+    
+    Parcel += p.lpSum(x[(i,j)] for j in cities) == 1
+    #Every city is connected to exactly one hub. (Connections between hubs are
+    #implied in the objective function.)
+    for j in cities:
+        Parcel += x[(i,j)] <= e[(i,j)]
+        Parcel += x[(i,j)] <= h[j]
+        Parcel += x[(i,j)] >= e[(i,j)] + h[j] - 1
+        #Helper variable, see lecture notes 2.5
+        
+        Parcel += e[(i,j)] <= (h[i] + h[j])
+        #This mostly makes sure non-hub cities are not connected to eachother.
+        
+        Parcel += e[(i,j)] == e[(j,i)]
+        #Makes the graph undirected.
+        
+    Parcel += p.lpSum(h[i] for i in cities) >= 1
+    #There needs to be at least one hub.
+    
+solver = p.CPLEX_CMD()
+res = Parcel.solve(solver)
+print("status:", res)
+print("OPT:", p.value(Parcel.objective))
