@@ -1,7 +1,8 @@
 \documentclass{article}
 \usepackage[utf8]{inputenc}
 \usepackage{authblk}
-
+\usepackage{graphicx}
+\usepackage[table]{xcolor}
 
 
 
@@ -54,29 +55,175 @@ Before a code can be written that tries to optimize the building of hubs in citi
     \subsection{The different algorithms used}
     
     After obtaining a function which calculates the cost of assigning hubs to cities, an intuitive algorithm can be made which tries to give an approximation of the combination of hubs that will result in the lowest possible amount of money that the company will have to spend when moving packages. 
-    Since the intuitive algorithms are inherently less accurate than a standardized solver, the different aspects of moving packages are split up and solved using different types of algorithms. The total process is divided into the collection from the cities to the hubs, fo
+    Since the intuitive algorithms are inherently less accurate than a standardized solver, the different aspects of moving packages are split up and solved using different types of algorithms. Hereby, the goal is to minimize the error that the functions have by eventually combining multiple intuitive algorithms such that a minimum cost can be achieved. The total process is divided into the collection from the cities to the hubs, followed by the transfer between hubs themselves, and as last the distribution of packages from the hubs to the desired cities. 
     
+\subsection{Collection of packages}    
+
+In this process the cost function will only give an output of the cost that is formed by combining the cost for collection packages.
+To optimize the costs a python script is made such that, when a city is given to be a hub, the code calculates the cost for this specific hub and the cost if the city next in line would be a hub as well. If the total cost drops by adding city as a hub, this city will be added to list of cities that are hubs. If the cost rises, the city will be discarded from the process. If this process is repeated with each time a different starting, a list will appear of possible combination of hubs and there costs. To illustrate this process the outputs will be stated below if it were to start with city number 3 as a hub.
+
+\begin{table}[h!]
+\begin{center}
+ \begin{tabular}{||c |c||} 
+ \hline
+ Cost of the combination(€ x 10^3) & combination on cities as hubs \\ [0.5ex] 
+ \hline\hline
+ 169.3 & [3,1]  \\ 
+ \hline
+ 169.8 & [3,2]  \\
+ \hline
+ 169.8 & [3,4]  \\
+ \hline
+ 127.2 & [3,5]  \\ 
+ \hline
+ 132.0 & [3,5,6]  \\
+  \hline
+ 127.4 & [3,5,7]  \\
+ \hline
+ 128.5 & [3,5,8]  \\
+ \hline
+ 124.8 & [3,5,9]  \\
+  \hline
+ 118.7 & [3,5,9,10]  \\
+ [1ex] 
+ \hline
+\end{tabular}
+\end{center}
+\caption{Exampled of the algorithm which adds cities one by one as hubs based on the cost}
+\label{Collection Algorithm}
+\end{table}
+
+Using this method, the algorithm can give the most frequently used cities as hubs. To illustrate the difference in accuracy between the different models the table below will give the amount of times cities are used as hubs in each different part.% Herlezen
+
+\begin{table}
+\begin{tabular}{|p{3cm}|p{3cm}|p{3cm}|}
+\hline
+\multicolumn{3}{|c|}{Amount of times cities are used as hubs} \\
+\hline
+City used as hub & Using only collection cost & Using total cost\\
+\hline
+1 &  8 & 5 \\
+\hline
+2 & 4   & 11 \\
+\hline
+3& 7 & 9\\
+\hline
+4    & 1 & 1 \\
+\hline
+5 & 8 & 9\\
+\hline
+6 & 1 & 8   \\
+\hline
+7 & 2& 3 \\
+
+\hline
+8 & 2 & 2 \\
+\hline
+9 &  7& 10 \\
+\hline
+10 & 11 & 11 \\
+\hline
+11 & 1& 2 \\
+\hline
+12 & 1 & 1 \\
+\hline
+13 & 2& 2 \\
+\hline
+14 & 14& 14 \\
+\hline
+\end{tabular}
+\caption{Table of the amount of times each city is used as a hub in every combination}
+\label{amount of times hubs are used in collection} 
+\end{table}
+
+Using this table a conclusion can be drawn which hubs could be used in the optimum configuration. However, a big part of cost reduction is the combination of specific hubs. Consider city number 6 for example, here it shows that making this city a hub is not a valuable if the algorithm only takes the collection cost in account, but rises significantly if all cost are calculated. 
+
+When the algorithm is used for different input combinations based on ~\ref{amount of times hubs are used in collection} the outputs and results show different possible answers with supposedly relative low cost. Hereby the algorithm will add a city as hub if this results in a lower cost by the principle given in the beginning of the section. 
+
+\begin{table}
+\begin{tabular}{ |p{3cm}|p{3cm}|p{4cm}|}
+\hline
+\multicolumn{3}{|c|}{Cost and combination of hubs with certain input} \\
+\hline
+Input into the algorithm & Output -  collection Cost (€ x 10^3) & Output - total Cost (€ x 10^3)\\
+\hline
+[14] &  92.6 | [14, 1, 3] & 166.4 | [14, 1, 2, 3, 5, 7]  \\
+\hline
+[10] & 90.0 | [10, 2, 14]   & 153.0 | [10, 2, 14, 8] \\
+\hline
+[6, 10]& 93.9 | [6, 10, 14] & 150.4 |  [6, 10, 14]\\
+\hline
+[6, 14] &  82.9 | [6, 14]  &  144.5 | [6, 14, 8] \\
+\hline
+[9, 14] &  100.7| [9, 14, 1, 3] & 160.4 |  [9, 14, 2, 3, 7] \\
+\hline
+[2, 14] & 87.6 | [2, 14, 6] & 156.9 |  [2, 14, 3, 6]\\
+\hline
+[2, 10, 14] & 90.0 | [2, 10, 14] & 153.0 | [2, 10, 14, 8]  \\
+\hline
+\end{tabular}
+\caption{Table of the amount of times each city is used as a hub in every combination}
+\label{amount of times hubs are used in collection} 
+\end{table}
+
+The combination of cities 6, 8 and 14 will probably have one of the lower possible costs for this problem for as well the collection cost as the total cost. Using this combination it shows that the cost can be reduced to around 145 thousand euros. 
+
+
+\subsection{Transfer between hubs}
+Transport to the same node is free if the node is a hub. To optimize the total cost an algorithm is made that will be looking at the node with the most flow of parcels to itself and make a hub of this node. After calculating the cost, the next hub with the most flow of parcels to itself will be become a hub. If the solution becomes cheaper by adding a hub, the node is added to a list of hubs. If the total cost increases, nothing happens and the next node (most parcels to itself) becomes a hub. If there are two nodes with the same amount of parcels to itself the algorithm will choose the node with the most incoming parcels. Each node will be connected to the hub with the least cost to transport it there. For example if it cost 11 dollars to transport from node 11 to node 14 and 27 dollars to transport it to node 2, node 11 will be connected with hub 14. This process is repeated until the algorithm goes through all nodes. To illustrate we will use the Large data assignment.
+
+\begin{table}[h]
+\begin{tabular}{|p{3cm}|p{3cm}|p{3cm}|}
+\hline
+nodes that are hubs & flow of parcels to itself (last node) & Total cost\\
+\hline
+[14] &  181 & 182725 \\
+\hline
+[14,2]   & 39 & 163586 \\
+\hline
+[14,2,15] & 26 & 169342 \\
+\hline
+[14,2,15,6]  & 18 & 156535 \\
+\hline
+[14,2,15,6,13] & 18 & 161521\\
+\hline
+[14,2,15,6,13,4] & 11 & 167037   \\
+\hline
+[14,2,15,6,13,4,3] & 9 & 177126   \\
+\hline
+[14,2,15,6,13,4,3,9] & 9 & 187710    \\
+\end{tabular}
+\end{table}
+
+
+The cheapest situation here is where there are 4 hubs in nodes 2,6,14 and 15. We connect each node with the hub where the cost to transport a parcel is the lowest, the total cost in this situation would be 156 thousand dollars. One can easily see that it is very profitable to make a hub out of node 14, as it is the node with the most incoming parcels (610). In the following subsections we will be looking at the results of the other algorithms and combine those to see if there are similarities.
     
-    
-\subsubsection{Hubs self-flow}
-Transport to the same node is free if the node is a hub. This algorithm will be looking at the node with the most flow of parcels to itself and make a hub of this node. For this we will use the Large data assignment.
-\paragraph{The Algorithm:}
-Node 14 has the most flow of parcels to itself (181), so this becomes our first hub. There is only one hub so all other nodes will be connected to this hub. The Total cost will be calculated using our cost-function in python.
-The total cost is 182725,0.
-
-The second node with the most flow of parcels to itself is node 2 with 39 parcels. Each node will be connected to the hub with the least cost to transport it there. For example for node 11 it cost 11 dollars to transport it to hub 14 and 27 dollars to transport it to hub 2, so node 11 will be connected with hub 14.The total cost is 163586
-
-The third node with the most flow of parcels to itself is node 15 with 26 parcels. What will happen if this node becomes a hub? As before the nodes will be connected to the hub with the least cost to transport it there. The total cost is 169342
- 
-If there are two nodes with the same amount of parcels to itself the algorithm will choose the node with the most incoming parcels. This algorithm will go through all nodes until the total cost by opening an extra hub becomes more expensive then the cheapest situation
-
-\paragraph{Conclusion}
-The cheapest situation here is where there are 5 hubs in nodes 2,6,13,14 and 15. We connect each node with the hub where the cost to transport a parcel is the lowest. The total cost in this situation would be 161521. One can easily see that node 14 must become a hub as it has the most flow of parcels to itself (181). In the following subsections we will be looking at the results of the other algorithms and combine those to see if there are similarities.
-    
-
+\newpage
     
     
     \subsection{Result of the combined algorithms}
+After combining and analysing the results of the different algorithms, a hub will be opened at nodes 14 and 6 as these nodes were also hubs in the cheapest situation of all different algorithms that were used. By opening a hub at node 14 the cost for collecting , transferring and distributing can be reduced, as it is the node with the most amount of incoming parcels. The total cost in this situation where we only have two hubs is 144870. Our intuitive algorithm will then go through the nodes one by one and check which combination (with node 14 and 6) is the cheapest, this node will then be added to the list of hubs. This process is repeated until we go through all nodes. 
+
+\begin{table}[h]
+\begin{tabular}{||c |c||}
+\hline
+Nodes that are hubs & Total cost\\
+\hline
+[6,14] &  144870 \\
+\hline
+[6,8,14]   & 144532\\
+\hline
+[2,6,8,14] & 148189 \\
+\hline
+[2,5,6,8,14]  & 152593  \\
+\hline
+[2,5,6,8,12,14] & 160386 \\
+\end{tabular}
+\end{table}
+
+The most advantageous situation that was found with the intuitive algorithm is 
+where we make 3 hubs out of nodes 6,8 and 14. By doing this the total cost is reduced to 144532 dollars which is 338 dollars cheaper than the previous one.    (heb dit snel gemaakt verander het als je wilt)
+
 
 
  
@@ -86,9 +233,13 @@ We are given a set N of nodes where we can locate a hub. The cost of opening a h
     \subsection{ILP implementation}
     \subsection{IlP result}
 
-\newpage
-\section{Expanded intuitive algorithm}
 
+
+\newpage
+\section{Expanded algorithm}
+The package delivery problem is set out into a data set where only the cost per package and the amount of packages send and received are given. To make this problem more realistic a situation is made where all the packages are collected and distributed using a bus. In this particular case, a bus can hold up to and including a total of one hundred packages. If more packages are needed to move every package, the delivery company will have to send two or more busses. 
+
+This scenario is translated into the algorithm by letting all factors of moving packages 
 
 \newpage
 \section{Conclusion}
