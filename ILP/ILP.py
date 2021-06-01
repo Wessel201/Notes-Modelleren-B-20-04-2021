@@ -32,10 +32,17 @@ e = p.LpVariable.dicts('hasEdge', ((i,j) for i in cities
 x = p.LpVariable.dicts('Helper1', ((i,j) for i in cities
                                          for j in cities), cat='Binary')
 
+y = p.LpVariable.dicts('Helper2', ((i,j,k,l) for i in cities
+                                          for j in cities
+                                          for k in cities
+                                          for l in cities), cat='Binary')
+
+a = p.LpVariable.dicts('Helper4', ((i,j) for i in cities
+                                         for j in cities), cat='Binary')
 #Objective function
 
-Parcel += p.lpSum(flow[i][j]*(col*cost[i][k]*e[(i,k)]+
-                           (trns*cost[k][l]+dist*cost[l][j])*e[(l,j)])
+Parcel += p.lpSum(flow[i][j]*(col*cost[i][k]+
+                           trns*cost[k][l]+dist*cost[l][j])
                for i in cities
                for j in cities
                for k in cities
@@ -53,21 +60,28 @@ for i in cities:
     Parcel += p.lpSum(e[(i,j)] for j in cities) >= 1
     #Every city is collected to at least one other city.
     
-    Parcel += p.lpSum(x[(i,j)] for j in cities) == 1
-    #Every city is connected to exactly one hub. (Connections between hubs are
-    #implied in the objective function.)
+    Parcel += p.lpSum(x[(i,j)] for j in cities) <= 1
+    #Every city is connected to exactly one hub.
+    
     for j in cities:
         Parcel += x[(i,j)] <= e[(i,j)]
-        Parcel += x[(i,j)] <= h[j]
-        Parcel += x[(i,j)] >= e[(i,j)] + h[j] - 1
-        #Helper variable, see lecture notes 2.5
+        Parcel += x[(i,j)] <= (1-h[i])
+        Parcel += x[(i,j)] >= e[(i,j)] + (1-h[i]) - 1
+        #Helper function, see lecture notes 2.5
         
-        Parcel += e[(i,j)] <= (h[i] + h[j])
-        #This mostly makes sure non-hub cities are not connected to eachother.
+        Parcel += a[(i,j)] <= h[i]
+        Parcel += a[(i,j)] <= h[j]
+        Parcel += a[(i,j)] >= h[i] + h[j] - 1
         
+        Parcel += e[(i,j)] >= a[(i,j)]
+        #There must be connections between hubs.
+  
         Parcel += e[(i,j)] == e[(j,i)]
         #Makes the graph undirected.
         
+        Parcel += e[(i,j)] <= h[i] + h[j]
+        #No connections between cities
+
     Parcel += p.lpSum(h[i] for i in cities) >= 1
     #There needs to be at least one hub.
     
