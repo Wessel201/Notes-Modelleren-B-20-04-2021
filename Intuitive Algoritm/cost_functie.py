@@ -1,8 +1,10 @@
 import pandas as pd 
 import matplotlib.pyplot as plt
-collection_factor = 3
+import math
+collection_factor = 1
 transfer_factor = 1
-distribution_factor = 2 
+distribution_factor = 2
+bus_capactity = 50
 
 file_name ='Large.xlsx'
 class parcel():
@@ -29,7 +31,7 @@ class parcel():
 				cost+= self.hub_cost[i]
 				continue
 			nearest_hub = cost_copy.loc[cost_copy[i] > 0 , i].idxmin()
-			cost += cost_copy[i][nearest_hub] * flow_copy[i].sum()*collection_factor
+			cost += cost_copy[i][nearest_hub] * flow_copy[i].sum()*math.ceil(flow_copy[i].sum()/bus_capactity)*collection_factor
 			nearest_hub = nearest_hub 
 			index[i] = nearest_hub
 			flow_copy[nearest_hub-1] = flow_copy[i]+flow_copy[nearest_hub-1]
@@ -41,7 +43,7 @@ class parcel():
 			prices = list(cost_copy[to_hub])
 			total_packages = sum(flowss)
 			transfer_cost = sum([int(flowss[i])*int(prices[i]) for i in range(len(flowss))])
-			distribution_cost = self.package_cost[to_hub][i+1]*total_packages*distribution_factor
+			distribution_cost = self.package_cost[to_hub][i+1]*math.ceil(total_packages/bus_capactity)*distribution_factor*total_packages
 			# print(distribution_cost)13530
 
 			# print(transfer_cost)
