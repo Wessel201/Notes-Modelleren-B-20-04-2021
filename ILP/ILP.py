@@ -24,66 +24,45 @@ hub_cost = np.append([13530], hub_cost)
 Parcel = p.LpProblem('ParcelDelivery', p.LpMinimize)
 
 #Variables
-h = p.LpVariable.dicts('isHub', cities, cat='Binary')
+e = p.LpVariable.dicts('hasEdge', ((i,k) for i in cities
+                                         for k in cities), cat='Binary')
+#1 if city i is assigned to hub k, 0 otherwise
 
-e = p.LpVariable.dicts('hasEdge', ((i,j) for i in cities
-                                         for j in cities), cat='Binary')
-
-x = p.LpVariable.dicts('Helper1', ((i,j) for i in cities
-                                         for j in cities), cat='Binary')
-
-y = p.LpVariable.dicts('Helper2', ((i,j,k,l) for i in cities
+y = p.LpVariable.dicts('Flow', ((i,j,k,l) for i in cities
                                           for j in cities
                                           for k in cities
                                           for l in cities), cat='Binary')
+#1 if i->k->l->j is the path from i to j, 0 otherwise
 
-a = p.LpVariable.dicts('Helper4', ((i,j) for i in cities
-                                         for j in cities), cat='Binary')
 #Objective function
 
 Parcel += p.lpSum(flow[i][j]*(col*cost[i][k]+
-                           trns*cost[k][l]+dist*cost[l][j])
+                           trns*cost[k][l]+dist*cost[l][j])*y[(i,j,k,l)]
                for i in cities
                for j in cities
                for k in cities
-               for l in cities) + p.lpSum(hub_cost[i]*h[i] for i in cities)
-#col*cost[i][k]*e[(i,k)] and (trns*cost[k][l]+dist*cost[l][j])*e[(l,j)] are not
-#dependent on eachother. So the first part gets added whenever e[(i,k)]=1 and
-#the second part whenever e[(l,j)] = 1. While it is only supposed to happen
-#when both of them are 1.
+               for l in cities) + p.lpSum(hub_cost[k]*e[k,k] for k in cities)
+
 
 #Constraints
 for i in cities:
-    Parcel += e[(i,i)] - h[i] == 0
-    #Hubs are connected to themselves, cities are not
+    Parcel += p.lpSum(e[(i,k)] for k in cities) == 1
+    #Each city i is connected to exactly one hub k.
     
-    Parcel += p.lpSum(e[(i,j)] for j in cities) >= 1
-    #Every city is collected to at least one other city.
-    
-    Parcel += p.lpSum(x[(i,j)] for j in cities) <= 1
-    #Every city is connected to exactly one hub.
-    
-    for j in cities:
-        Parcel += x[(i,j)] <= e[(i,j)]
-        Parcel += x[(i,j)] <= (1-h[i])
-        Parcel += x[(i,j)] >= e[(i,j)] + (1-h[i]) - 1
-        #Helper function, see lecture notes 2.5
+    for k in cities:
+        Parcel += e[(i,k)] <= e[(k,k)]
+        #There can only be connections from i to k if k is connected to itself
+        #(meaning k is a hub)
         
-        Parcel += a[(i,j)] <= h[i]
-        Parcel += a[(i,j)] <= h[j]
-        Parcel += a[(i,j)] >= h[i] + h[j] - 1
-        
-        Parcel += e[(i,j)] >= a[(i,j)]
-        #There must be connections between hubs.
-  
-        Parcel += e[(i,j)] == e[(j,i)]
-        #Makes the graph undirected.
-        
-        Parcel += e[(i,j)] <= h[i] + h[j]
-        #No connections between cities
+        for j in cities:
+            for l in cities:
+                Parcel += y[(i,j,k,l)] <= e[(i,k)]
+                Parcel += y[(i,j,k,l)] <= e[(j,l)]
+                Parcel += y[(i,j,k,l)] >= e[(i,k)] + e[(j,l)] - 1
+#With these constraints: y[(i,j,k,l)] = e[(i,k)]*e[(j,l)]
 
-    Parcel += p.lpSum(h[i] for i in cities) >= 1
-    #There needs to be at least one hub.
+Parcel += p.lpSum(e[k,k] for k in cities) >= 1
+#There must be at least one hub
     
 solver = p.CPLEX_CMD()
 res = Parcel.solve(solver)
