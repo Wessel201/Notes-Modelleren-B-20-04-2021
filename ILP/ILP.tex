@@ -11,55 +11,40 @@
 \begin{document}
 \maketitle
 
-\section{Input}
+\subsection*{Input}
 \begin{align*}
-c_{ij} &= \text{cost between city i and j}  &i=1,2,\ldots,N \quad& j=1,2,\ldots,N\\
-w_{ij} &= \text{flow between city i and j} &i=1,2,\ldots,N \quad& j=1,2,\ldots,N\\
-f_{i} &= \text{cost to turn city i into a hub} &i=1,2,\ldots,N \quad\\
+c_{ij} &= \text{cost between city i and j}  &i,j \in N\\
+w_{ij} &= \text{flow between city i and j} &i,j \in N\\
+f_{i} &= \text{cost to turn city i into a hub} &i \in N\\
 \chi &= \text{collection cost multiplier} \\
 \alpha &= \text{transfer cost multiplier} \\
 \delta &= \text{distribution cost multiplier} \\
 \end{align*}
 
-\section{Variables}
+\subsection*{Variables}
 \begin{align*}
-h_{i} &=
+e_{ik} &=
 \begin{cases} 
-1, & \text{if city i is a hub} \quad i=1,2,\ldots,N \\ 
+1, & \text{if city i is assigned to hub k} \quad i=1,2,\ldots,N \quad j=1,2,\ldots,N  \\ 
 0, & \text{otherwise} 
-\end{cases} \\ 
-e_{ij} &=
+\end{cases} \\
+y_{ijkl} &=
 \begin{cases} 
-1, & \text{if there is and edge between city i and j} \quad i=1,2,\ldots,N \quad j=1,2,\ldots,N  \\ 
+1, & \text{if there is a path } i \rightarrow k \rightarrow l \rightarrow j \quad i=1,2,\ldots,N \quad j=1,2,\ldots,N  \\ 
 0, & \text{otherwise} 
 \end{cases} \\
-y_{ij} &=
-\begin{cases}
-1, & \text{if i is a non-hub city and has an edge with city j} \quad i=1,2,\ldots,N \quad j=1,2,\ldots,N \\
-0, & \text{otherwise} 
-\end{cases} \\
-x_{ij} &=
-\begin{cases}
-1, & \text{if i is a non-hub city and has an edge with a hub j} \quad i=1,2,\ldots,N \quad j=1,2,\ldots,N \\
-0, & \text{otherwise} 
-\end{cases} \\
-z &= \text{total cost of the given hubs and connections}
 \end{align*}
 
-\section{Objective function}
-$$min\,z=\sum^N_{i=1}\sum^N_{j=1}\sum^N_{k=1}\sum^N_{l=1}(w_{ij}(\chi c_{ik}e_{ik}+(\alpha c_{kl}+\delta c_{lj})e_{lj})) + \sum^N_{i=1}f_{i}h_{i}$$
-s.t.
+\subsection*{Objective function}
+$$min\,z=\sum^N_{i=1}\sum^N_{j=1}\sum^N_{k=1}\sum^N_{l=1}(w_{ij}(\chi c_{ik}+\alpha c_{kl}+\delta c_{lj})y_{ijlk} + \sum^N_{k=1}f_{k}e_{kk}$$
+
+\subsection*{Constraints}
 \begin{align*}
-e_{ii}-h_{i} &= 0 &i=1,2,\ldots,N \quad&\\
-\sum^N_{j=1}y_{ij} &= 1 &i=1,2,\ldots,N \quad&\\
-\sum^N_{j=1}x_{ij} &=1 &i=1,2,\ldots,N \quad&\\
-y_{ij} &\leq (1-h_i) &i=1,2,\ldots,N \quad& j=1,2,\ldots,N \\
-y_{ij} &\leq e_{ij} &i=1,2,\ldots,N \quad& j=1,2,\ldots,N \\
-y_{ij} &\geq e_{ij}-h_i &i=1,2,\ldots,N \quad& j=1,2,\ldots,N \\
-x_{ij} &\leq y_{ij} &i=1,2,\ldots,N \quad& j=1,2,\ldots,N \\
-x_{ij} &\leq h_j &i=1,2,\ldots,N \quad& j=1,2,\ldots,N \\
-x_{ij} &\geq y_{ij} + h_j - 1 &i=1,2,\ldots,N \quad& j=1,2,\ldots,N \\
-\sum^N_{i=1}h_{i} &\geq 1 \\
-h_i, e_{ij}, y_{ij}, x_{ij} &\in \{0,1\} &i=1,2,\ldots,N \quad& j=1,2,\ldots,N \\
+\sum^N_{k=1}e_{ik} &= 1 &i \in N \\
+e_{ik} & \leq e_{kk} &i,k \in N \\
+y_{ijkl} &\leq e_{ik} &i,j,k,l \in N \\
+y_{ijkl} &\leq e_{jl} &i,j,k,l \in N \\
+y_{ijkl} &\geq e_{ik} + e_{jl} - 1 &i,j,k,l \in N \\
+\sum^N_{k=1}f_k e_{kk} &\geq 1
 \end{align*}
 \end{document}
