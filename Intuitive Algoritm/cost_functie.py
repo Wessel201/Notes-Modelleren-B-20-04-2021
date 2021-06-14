@@ -3,10 +3,12 @@ import matplotlib.pyplot as plt
 import math
 collection_factor = 1
 transfer_factor = 1
-distribution_factor = 2
-bus_capactity = 50
+distribution_factor = 1
+bus_capactity = 100
 
-file_name ='Large.xlsx'
+file_name ='data_klein.xlsx'
+
+
 class parcel():
 	def __init__(self,file):
 		xls = pd.ExcelFile(file)
@@ -14,7 +16,11 @@ class parcel():
 		self.flow = self.flow.transpose()
 		self.package_cost = pd.read_excel(xls, 'c')
 		self.package_cost = self.package_cost.transpose()
-		self.hub_cost =[13530] + list(pd.read_excel(xls, 'f')[13530])
+		if file == 'Large.xlsx':
+			self.hub_cost =[13530] + list(pd.read_excel(xls, 'f')[13530])
+		else:
+			self.hub_cost =[4388] + list(pd.read_excel(xls, 'f')[4388])
+
 		self.cities = len(self.flow.columns)
 
 	def calculate_cost(self,hubs):
@@ -56,4 +62,4 @@ class parcel():
 
 
 test = parcel(file_name) 
-print(test.calculate_cost([1,3]))
+print(test.calculate_cost([6,14]))
