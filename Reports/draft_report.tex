@@ -265,8 +265,8 @@ Before a code can be written that tries to optimize the building of hubs in citi
                         [2, 5] & 33.1 | [2,5,4,6] & 50.4| [2, 5, 3,6]  \\
                         \hline
                     \end{tabular}
+                    \caption{Table of the amount of times each city is used as a hub in every combination small data set}
                 \end{center}
-            \caption{Table of the amount of times each city is used as a hub in every combination small data set}
             \label{amount of times hubs are used in collection small} 
             \end{table}
             
@@ -274,6 +274,7 @@ Before a code can be written that tries to optimize the building of hubs in citi
 
     \subsection{Transfer between hubs} \label{sssec:num1}
         Transport to the same city is free if the city is a hub. To optimize the total cost an algorithm is made that will look at the city with the most flow of parcels to itself and make a hub out of this city. After calculating the cost, the next city with the most flow of parcels to itself will be become a hub. If the solution becomes cheaper by adding a hub, the city is added to a list of hubs. If the total cost increases, nothing happens and the next city (most parcels to itself) becomes a hub. If there are two cities with the same amount of parcels to itself the algorithm will choose the node with the most incoming parcels. Each node will be connected to the hub with the least cost to transport it there, for example if it cost €11 to transport from city 11 to hub 14 and €27 to transport it to hub 2, city 11 will be connected with hub 14. This process is repeated until the algorithm goes through all cities. To illustrate we will use the Large and Small data assignment.
+
 \subsubsection{Result of the large data set}
         \begin{table}[h!]
             \begin{tabular}{||c|c|c||}
@@ -326,6 +327,9 @@ The cheapest situation is when there are 4 hubs in cities 2,6,14 and 15. We conn
             \end{tabular}
         \caption{Table of nodes that were used as hubs and the associated costs (Small Data)}
         \end{table}
+
+The most profitable solution is to pick hubs in nodes 2,4 and 6.        
+        
 
 \subsection{Distribution of packages}
 \label{Distribution}
@@ -1021,6 +1025,7 @@ Once again, the algorithm is repeated but instead with a focus on the total cost
 As in section \ref{sssec:num2} hubs will be established in cities 6 and 14. The same algorithm used in section \ref{sssec:num2} will be implemented to find the optimal solution. 
 
 \begin{table}[h]
+\begin{center}
 \begin{tabular}{||c |c||}
 \hline
 Nodes that are hubs & Total cost (€ x 10^3)\\
@@ -1041,6 +1046,7 @@ Nodes that are hubs & Total cost (€ x 10^3)\\
 [6,14,2,8,13,15,12,5] & 170.0 \\
 \hline
 \end{tabular}
+\end{center}
 \caption{Table of nodes that were used as hubs in the expanded algorithm}
 \end{table}
 
@@ -1050,9 +1056,9 @@ The optimal solution that is found is when hubs are established in nodes 6 and 1
 \subsection{Expanded ILP solver}
 Unfortunately, the attempt at an ILP solver for the expanded problem was unsuccessful. However, the implementation and the obtained result will be detailed below still.
 \subsection{Expanded ILP implementation}
-The expanded ILP implementation builds further upon the ILP implementation in section \ref{ILPimp}. First, we start by introducing 3 new variables:
+The expanded ILP implementation builds further upon the ILP implementation in section \ref{ILPimp}. First, we want the multipliers in the objective function to be variable instead of constant. Since the total flow over an edge in a specific direction can be split up into three categories (city to hub, hub to hub or hub to city), three new variables are introduced:
 \begin{align}
-mc_{ij} &= 
+    mc_
 \end{align}
 
 $$min \, z &= \sum^N_{i=1}\sum^N_{j=1}\sum^N_{k=1}\sum^N_{l=1} w_{ij}(\chi c_{ik} + \alpha c_{kl} + \delta c_{lj})y_{ijkl}$$
@@ -1100,6 +1106,7 @@ collection_factor = 1
 transfer_factor = 1
 distribution_factor = 1
 bus_capactity = 100
+#Bus capacity is only relevant for the expanded algorithm
 
 file_name ='data_klein.xlsx'
 
