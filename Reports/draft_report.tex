@@ -30,7 +30,11 @@
 \newpage
 \section*{Summary}
 \addcontentsline{toc}{section}{Summary}
-In this project we explored the world of parcel delivery. Based on a dataset provided we explored various option to optimize the cost of delivering a parcel, this cost optimization was done by building or not building hubs near certain cities. The first algorithm applied was an intuitive algorithm it does not guarantee the optimal solution, but it does give a reasonable solution. The other algorithm applied was an ILP which is takes a lot longer to run but does give the best possible solution.
+In this project we explored the world of parcel delivery. Based on a dataset provided we explored various option to optimize the cost of delivering a parcel, this cost optimization was done by building or not building hubs near certain cities. The first algorithm applied was an intuitive algorithm it does not guarantee the optimal solution, but it does give a reasonable solution. The intuitive algorithm worked by iteratively finding the hub that would give the lowest cost and adding that to the list of hubs. So the program would find the hub that would minimize cost and add it to the list, for example 14 then it would go through all hubs again and find for example that 8 would minimize cost. This would repeat till adding an extra hub would not lower cost any more. The other algorithm applied was an ILP which is takes a lot longer to run but does give the best possible solution.
+
+Interestingly, the results of the ILP solver came very close to the results of the intuitive algorithm. Both the ILP and the intuitive algorithm gave as the optimal solution that cities 14,8,6 should be hubs for a total cost of 144.522 euros. The only difference between the result of the ILP and the Intuitive algorithm is that ILP connected city 10 with hub 6 whilst the intuitive algorithm connected that city with hub 14. This difference was only 163 euros. 
+
+To extend the problem, we wanted to make the model more realistic. We looked at what if the amount of packages would be limited by the capacity of a transport bus. So instead of using multipliers which we used in the original problem we capped the maximum amount a bus could carry and determined the cost by the amount of transport busses necessary. 
 
 %mag wat langer // moet opzichzelf het gehele verslag omvatten // alle belangrijke info en conlcusie
 
@@ -80,14 +84,15 @@ Before a code can be written that tries to optimize the building of hubs in citi
     % we moeten misschien nog even de namen van 2.3 2.5 enzo aanpassen aangezien het originele idee van het opsplitsen van collection, transer en distribution  niet meer van toepassing is
     \subsection{Collection of packages}  
     \label{Collection of packages}
-    In this process the cost function will only give an output of the cost that is formed by combining the cost for collecting packages. To optimize the costs a python script is made such that, when a city is given to be a hub, the code calculates the cost for this specific hub and the cost if the city next in line would be a hub as well. If the total cost drops by adding city as a hub, this city will be added to list of cities that are hubs. If the cost rises, the city will be discarded from the process. If this process is repeated with each time a different starting node, a list will appear of possible combination of hubs and their costs. To illustrate this process the outputs will be stated below if it were to start with city number 3 as a hub.
+    In this process the cost function will only give an output of the cost that is formed by combining the cost for collecting packages. To optimize the costs a Python script is made such that, when a city is given to be a hub, the code calculates the cost for this specific hub and the cost if the city next in line would be a hub as well. If the total cost drops by adding city as a hub, this city will be added to list of cities that are hubs. If the cost rises, the city will be discarded from the process. If this process is repeated with each time a different starting node, a list will appear of possible combination of hubs and their costs. To illustrate this process the outputs will be stated below in table~\ref{Collection Algorithm} if it were to start with city number 3 as a hub.
 
     \begin{table}[h!]
         \begin{center}
             \begin{tabular}{||c |c||} 
                 \hline
-                Cost of the combination(€ x 10^3) & combination on cities as hubs \\ [0.5ex] 
-                \hline\hline
+                Cost of the combination(€ x 10^3) & combination of cities as hubs \\ [0.5ex] 
+                \hline
+                \hline
                 169.3 & [3,1]  \\ 
                 \hline
                 169.8 & [3,2]  \\
@@ -121,11 +126,13 @@ Before a code can be written that tries to optimize the building of hubs in citi
     
             \begin{table}[h!]
                 \begin{center}
-                \begin{tabular}{|p{3cm}|p{3cm}|p{3cm}|}
+                \begin{tabular}{||c|c|c||}
                     \hline
-                    \multicolumn{3}{|c|}{Amount of times cities are used as hubs} \\
+                    \multicolumn{3}{||c||}{Amount of times cities are used as hubs} \\
+                    \hline
                     \hline
                     City used as hub & Using only collection cost & Using total cost\\
+                    \hline
                     \hline
                     1 &  8 & 5 \\
                     \hline
@@ -163,15 +170,17 @@ Before a code can be written that tries to optimize the building of hubs in citi
     
             Using this table a conclusion can be drawn which hubs could be used in the optimum configuration. However, a big part of cost reduction is the combination of specific hubs. Consider city number 6 for example, here it shows that making this city a hub is not a valuable if the algorithm only takes the collection cost in account, but rises significantly if all cost are calculated. 
             
-            When the algorithm is used for different input combinations based on ~\ref{amount of times hubs are used in collection} the outputs and results show different possible answers with supposedly relative low cost. Hereby the algorithm will add a city as hub if this results in a lower cost by the principle given in the beginning of the section. 
+            When the algorithm is used for different input combinations based on table ~\ref{amount of times hubs are used in collection} the outputs and results show different possible answers with supposedly relative low cost. Hereby the algorithm will add a city as hub if this results in a lower cost by the principle given in the beginning of the section. 
     
             \begin{table}[h!]
                 \begin{center}
-                    \begin{tabular}{ |p{3cm}|p{3cm}|p{4cm}|}
+                    \begin{tabular}{||c|c|c||}
                         \hline
-                        \multicolumn{3}{|c|}{Cost and combination of hubs with certain input} \\
+                        \multicolumn{3}{||c||}{Cost and combination of hubs with certain input} \\
+                        \hline
                         \hline
                         Input into the algorithm & Output -  collection Cost (€ x 10^3) & Output - total Cost (€ x 10^3)\\
+                        \hline
                         \hline
                         [14] &  92.6 | [14, 1, 3] & 166.4 | [14, 1, 2, 3, 5, 7]  \\
                         \hline
@@ -200,45 +209,74 @@ Before a code can be written that tries to optimize the building of hubs in citi
             
              \begin{table}[h!]
                 \begin{center}
-                \begin{tabular}{|p{3cm}|p{3cm}|p{3cm}|}
+                \begin{tabular}{||c|c|c||}
                     \hline
-                    \multicolumn{3}{|c|}{Amount of times cities are used as hubs} \\
+                    \multicolumn{3}{||c||}{Amount of times cities are used as hubs} \\
                     \hline
                     City used as hub & Using only collection cost & Using total cost\\
                     \hline
-                    1 &  8 & 5 \\
+                    1 & 6 & 6 \\
                     \hline
-                    2 & 4   & 11 \\
+                    2 & 7   & 9\\
                     \hline
-                    3& 7 & 9\\
+                    3& 5& 7\\
                     \hline
-                    4  & 1 & 1 \\
+                    4  & 2 & 2 \\
                     \hline
-                    5 & 8 & 9\\
+                    5 & 4 & 7\\
                     \hline
-                    6 & 1 & 8   \\
+                    6 & 4 & 8   \\
                     \hline
-                    7 & 2& 3 \\
+                    7 & 4& 1 \\
                     \hline
-                    8 & 2 & 2 \\
+                    8 & 1 & 1 \\
                     \hline
-                    9 &  7& 10 \\
-                    \hline
-                    10 & 11 & 11 \\
+                    9 &  1& 1 \\
                     \hline
                 \end{tabular}
                 \end{center}
                 \caption{Table of the amount of times each city is used as a hub in every combination with the small data set}
-                \label{amount of times hubs are used in collection} 
+                \label{amount of times hubs are used in collection small} 
             \end{table}
             
-
+            Using this data an estimation is made for the following hubs.
+            
+               
+            \begin{table}[h!]
+                \begin{center}
+                    \begin{tabular}{||c|c|c||}
+                        \hline
+                        \multicolumn{3}{||c||}{Cost and combination of hubs with certain input} \\
+                        \hline
+                        Input into the algorithm & Output -  collection Cost (€ x 10^3) & Output - total Cost (€ x 10^3)\\
+                        \hline
+                        [1] & 35.1| [1,2,3,6] & 52.0| [1, 2, 3, 5, 6]  \\
+                        \hline
+                        [2] & 34.5 | [2,3,5,7]   & 50.4 | [2,3,5,6] \\
+                        \hline
+                        [3]& 33.4 | [3,5,7] & 50.4 |  [2,3,5,6]\\
+                        \hline
+                        [5] &  35.9| [5,1,2,4,6]  &  52.0 | [5,1,2,3,6] \\
+                        \hline
+                        [7] &  31.5| [7,1] & 50.8 |  [1,2,5,7] \\
+                        \hline
+                        [6] & 26.3 | [6,2] & 46.3 |  [2,4,6]\\
+                        \hline
+                        [2, 5] & 33.1 | [2,5,4,6] & 50.4| [2, 5, 3,6]  \\
+                        \hline
+                    \end{tabular}
+                \end{center}
+            \caption{Table of the amount of times each city is used as a hub in every combination small data set}
+            \label{amount of times hubs are used in collection small} 
+            \end{table}
+            
+            With the values out of table~\ref{amount of times hubs are used in collection small} it shows that making hubs in cities 2,4 and 6 will give an approximation of the optimal solution. This combination gives a total amount of 46330 euros.
 
     \subsection{Transfer between hubs} \label{sssec:num1}
-        Transport to the same node is free if the node is a hub. To optimize the total cost an algorithm is made that will look at the node with the most flow of parcels to itself and makes a hub of this node. After calculating the cost, the next hub with the most flow of parcels to itself will be become a hub. If the solution becomes cheaper by adding a hub, the node is added to a list of hubs. If the total cost increases, nothing happens and the next node (most parcels to itself) becomes a hub. If there are two nodes with the same amount of parcels to itself the algorithm will choose the node with the most incoming parcels. Each node will be connected to the hub with the least cost to transport it there, for example if it cost 11 dollars to transport from node 11 to hub 14 and 27 dollars to transport it to hub 2, node 11 will be connected with hub 14. This process is repeated until the algorithm goes through all nodes. To illustrate we will use the Large and small data assignment.
+        Transport to the same city is free if the city is a hub. To optimize the total cost an algorithm is made that will look at the city with the most flow of parcels to itself and make a hub out of this city. After calculating the cost, the next city with the most flow of parcels to itself will be become a hub. If the solution becomes cheaper by adding a hub, the city is added to a list of hubs. If the total cost increases, nothing happens and the next city (most parcels to itself) becomes a hub. If there are two cities with the same amount of parcels to itself the algorithm will choose the node with the most incoming parcels. Each node will be connected to the hub with the least cost to transport it there, for example if it cost €11 to transport from city 11 to hub 14 and €27 to transport it to hub 2, city 11 will be connected with hub 14. This process is repeated until the algorithm goes through all cities. To illustrate we will use the Large and Small data assignment.
 \subsubsection{Result of the large data set}
         \begin{table}[h!]
-            \begin{tabular}{|p{3cm}|p{3cm}|p{3cm}|}
+            \begin{tabular}{||c|c|c||}
                 \hline
                 nodes that are hubs & flow of parcels to itself (last node) & Total cost (€ x 10^3)\\
                 \hline
@@ -263,9 +301,31 @@ Before a code can be written that tries to optimize the building of hubs in citi
         \end{table}
 
 
-The cheapest situation here is where there are 4 hubs in nodes 2,6,14 and 15. We connect each node with the hub where the cost to transport a parcel is the lowest, the total cost in this situation would be €156.5 thousand. One can easily see that it is very profitable to make a hub out of node 14, as it is the node with the most incoming parcels (610). In the following subsections we will be looking at the results of the other algorithms and combine those to see if there are similarities.
+The cheapest situation is when there are 4 hubs in cities 2,6,14 and 15. We connect each city with the hub where the cost to transport a parcel is the lowest, the total cost in this situation would be €156.5 thousand. One can easily see that it is very profitable to make a hub out of city 14, as it is the city with the most incoming parcels (610). In the following subsections we will be looking at the results of the other algorithms and combine those to see if there are similarities.
 \subsubsection{Result of the small data set}
-(The results of the small data set are still being worked on, though this will be done identically to the large data set.)
+
+        \begin{table}[h!]
+            \begin{tabular}{||c|c|c||}
+                \hline
+                nodes that are hubs & flow of parcels to itself (last node) & Total cost (€ x 10^3)\\
+                \hline
+                [2] &  39 & 63.6\\
+                \hline
+                [2,6]   & 18 & 46.5 \\
+                \hline
+                [2,6,4] & 11 & 46.3 \\
+                \hline
+                [2,6,4,3]  & 9 & 49.1  \\
+                \hline
+                [2,6,4,3,7] & 9 & 51.1 \\
+                \hline
+                [2,6,4,3,7,9] & 9 & 54.2   \\
+                \hline
+                [2,6,4,3,7,9,5] & 8 & 58.2 \\
+                \hline
+            \end{tabular}
+        \caption{Table of nodes that were used as hubs and the associated costs (Small Data)}
+        \end{table}
 
 \subsection{Distribution of packages}
 \label{Distribution}
@@ -316,7 +376,7 @@ First, the algorithm was run to minimise distribution costs for the large data s
 \label{DistAlg}
 \end{table}
 
-As can be seen, the distribution costs decrease with each added hub until they reach 0. This is a result of distribution costs from hubs to themselves costs 0. So more of the actual costs are made up of transfer costs as more hubs get added. However, the total costs, displayed in the last column, have quite different results. At first, the costs decrease. But, after adding hub 9 the total costs increase from there onward. So, based on these results, a solution would be to pick hubs 2, 8, 10 and 14 with a total cost of 152974.
+As can be seen, the distribution costs decrease with each added hub until they reach 0. This is a result of distribution costs from hubs to themselves costs 0. So more of the actual costs are made up of transfer costs as more hubs get added. However, the total costs, displayed in the last column, have quite different results. At first, the costs decrease. But, after adding hub 9 the total costs increase from there onward. So, based on these results, a solution would be to pick hubs 2, 8, 10 and 14 with a total cost of €152.974.
 
 The algorithm was also used based on total costs to compare how much the results differed from basing it on solely distribution costs, the results of which can be found in table \ref{DistAlg2}. With this, the hubs 6, 10 and 14 form an optimal solution. Interestingly, the order in which certain hubs appear in this version is somewhat similar to when it was based on just distribution costs. For example, the first 5 hubs to be added in both cases are the same, namely 2, 6, 8, 10 and 14. Even though their order is different. From this we might conclude that these cities are attractive candidates to be hubs in general.
 
@@ -363,7 +423,76 @@ The algorithm was also used based on total costs to compare how much the results
 \label{DistAlg2}
 \end{table}
 \subsubsection{Result of the small data set}
-(The results of the small data set are still being worked on, though this will be done identically to the large data set.)
+For the small data set, the same algorithm was used. However, the input and programw as slightly modified to fit the small data set. The results can be seen in table \ref{DistAlgSmall1}.
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{||c|c|c||}
+        \hline
+        Chosen hub & Total distribution costs (€ x 10^3)& Total costs (€ x 10^3)  \\
+        \hline
+        \hline
+        6 & 18.4 & 49.3 \\
+        \hline
+        2 & 13.6 & 46.7 \\
+        \hline
+        4 & 9.6 & 46.3 \\
+        \hline
+        5 & 7.2 & 48.4 \\
+        \hline
+        1 & 5.4 & 50.0 \\
+        \hline
+        3 & 3.7 & 53.0 \\
+        \hline
+        8 & 2.2 & 55.3 \\
+        \hline
+        7 & 1.2 & 58.0 \\
+        \hline
+        9 & 0.8 & 63.0 \\
+        \hline
+        10 & 0 & 66.3 \\
+        \hline
+    \end{tabular}
+    \caption{Results based on distribution costs for the small data set}
+    \label{DistAlgSmall1}
+\end{table}
+
+We see that in this case the optimal solution occurs when hubs 2, 4 and 6 are chosen, with a total cost of €46.330.
+Once again, the algorithm was also run based on total costs, the results of which can be seen in table \ref{DistAlgSmall2}.
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{||c|c||}
+    \hline
+        Chosen hub & Total costs (€ x 10^3) \\
+        \hline
+        \hline
+        6 & 49.3 \\
+        \hline
+        2 & 46.7 \\
+        \hline
+        4 & 46.3 \\
+        \hline
+        1 & 48.0 \\
+        \hline
+        5 & 50.0 \\
+        \hline
+        7 & 52.1 \\
+        \hline
+        3 & 54.9 \\
+        \hline
+        8 & 58.0 \\
+        \hline
+        9 & 62.9 \\
+        \hline
+        10 & 66.3 \\
+        \hline
+    \end{tabular}
+    \caption{Results based on total costs for the small data set}
+    \label{DistAlgSmall2}
+\end{table}
+
+Notably; the first three cities to be added as hubs are the exact same for both cases, with the two after that being switched around. This might suggest that these cities are all good candidates for a hub. We also note that the optimal solution based on total costs is the same, namely hubs 2, 4 and 6 with a total cost of €46.330.
 
 
 
@@ -373,13 +502,15 @@ The algorithm was also used based on total costs to compare how much the results
     
     \subsection{Result of the combined algorithms}
     \subsubsection{Result of the large data set}
-By combining and analysing the results of the different algorithms, a hub will be opened at nodes 14 and 6 as these nodes were also hubs in the cheapest situation of all different algorithms that were used. By opening a hub at node 14 the cost for collecting , transferring and distributing can be reduced, as it is the node with the most amount of incoming parcels. The total cost in this situation where we only have two hubs is €144.870. The intuitive algorithm will then go through the nodes one by one and check which combination (with node 14 and 6) is the cheapest, this node will then be added to the list of hubs. This process is repeated until the algorithm goes through all nodes. 
+    \label{sssec:num2}
+By combining and analysing the results of the different algorithms, a hub will be opened at nodes 14 and 6 as these nodes were also hubs in the cheapest situation of all different algorithms that were used. By opening a hub at node 14 the cost for collecting, transferring and distributing can be reduced, as it is the node with the most amount of incoming parcels. The total cost in this situation where we only have two hubs is €144.870. The intuitive algorithm will then go through the nodes one by one and check which combination (with node 14 and 6) is the cheapest, this node will then be added to the list of hubs. This process is repeated until the algorithm goes through all nodes. 
 
 \begin{table}[h]
 \begin{tabular}{||c |c||}
 \hline
+
 Nodes that are hubs & Total cost (€ x 10^3)\\
-\hline
+\hline\hline
 [6,14] &  144.8 \\
 \hline
 [6,8,14]   & 144.5\\
@@ -400,9 +531,9 @@ where we make 3 hubs out of nodes 6,8 and 14. By doing this the total cost is re
 \begin{figure}[h]
 \centering
 \begin{tikzpicture}[main/.style = {draw, circle,minimum size=0.8cm}]
-\node[main] (6) {6};
-\node[main] (8) [below right=1.5cm of 6] {8};
-\node[main] (14) [below left=1.5cm of 6] {14};
+\node[main] (6) [fill = blue!20] {6};
+\node[main] (8) [below right=1.5cm of 6, fill =blue!20] {8};
+\node[main] (14) [below left=1.5cm of 6, fill =blue!20] {14};
 
 \node[main] (1) [above=of 6,xshift=-1.7cm,yshift=-1.7cm] {1};
 \node[main] (2) [above=of 6,xshift=-1.3cm,yshift=-0.9cm] {2};
@@ -444,7 +575,42 @@ where we make 3 hubs out of nodes 6,8 and 14. By doing this the total cost is re
 \end{figure}
 
 \subsubsection{Result of the small data set}
-(The results of the small data set are still being worked on, though this will be done identically to the large data set.)
+By combining and analysing the results of the different algorithms, a hub will be opened at nodes 2, 4 and 6. In the algorithms for both transfer and distribution the combination of these 3 offered the cheapest solution. The algorithm for collection costs does suggest that city 2 and 6 are good candidates as well, though less so for city 4. This results in a total cost of €46.330. Beyond these 3 cities, no other cities were found as viable hubs to make it even cheaper. 
+
+Notably, these hubs have the largest flow to themselves. Making them hubs reduces the costs of collecting, transferring and distributing those parcels to €0. Cities 2 and 6 also have some of the most outgoing and incoming parcels, meaning a lot is saved on collection and distribution costs there.
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[main/.style = {draw, circle,minimum size=0.8cm}]
+\node[main] (6) [fill = blue!20] {6};
+\node[main] (2) [below right=1.5cm of 6, fill = blue!20] {2};
+\node[main] (4) [below left=1.5cm of 6, fill = blue!20] {4};
+
+\node[main] (1) [right=1cm of 2] {1};
+
+\node[main] (3) [above=of 6,xshift=-1.7cm,yshift=-1.7cm] {3};
+\node[main] (5) [above=of 6,xshift=-1.3cm,yshift=-0.9cm] {5};
+\node[main] (7) [above=of 6,xshift=-0.5cm,yshift=-0.5cm] {7};
+\node[main] (8) [above=of 6,xshift=0.5cm,yshift=-0.5cm] {8};
+\node[main] (9) [above=of 6,xshift=1.3cm,yshift=-0.9cm] {9};
+\node[main] (10) [above=of 6, xshift=1.7cm,yshift=-1.7cm] {10};
+
+\draw[-] (6) -- (4);
+\draw[-] (6) -- (2);
+\draw[-] (4) -- (2);
+
+\draw[-] (6) -- (3);
+\draw[-] (6) -- (5);
+\draw[-] (6) -- (7);
+\draw[-] (6) -- (8);
+\draw[-] (6) -- (9);
+\draw[-] (6) -- (10);
+
+\draw[-] (2) -- (1);
+\end{tikzpicture}
+\caption{A graph of the optimal solution for the small data set}
+\end{figure}
+
 
  
 \newpage  
@@ -453,6 +619,7 @@ where we make 3 hubs out of nodes 6,8 and 14. By doing this the total cost is re
 With the intuitive algorithm now in place, an ILP solver for the problem. In the first subsection it will be detailed how the ILP was modelled. This includes the various inputs, the chosen variables, the objective function and the constraints. Then, the results of the ILP are discussed by comparing it to the results of the intuitive algorithm. The full ILP definition and the Python program used to solve it can be found in Appendix \ref{ILPDef} and \ref{ILPPyth}.
 
 \subsection{ILP implementation}
+\label{ILPimp}
 For the implementation of the ILP the actual values of the inputs will not be used, rather variables to represent any valid input for the ILP. The actual values can be found in <add ref>. A network of n nodes given by the set N represent the city. A city i $\in$ N can be transformed into a hub with cost $f_i$. The amount of packages sent, or flow, from a city i $\in$ N and a city j $\in$ N is given by $w_{ij}$. The cost to send one unit of flow from a city i $\in$ N to a city j $\in$ N is given by $c_{ij}$. It is important to note that the costs are symmetric. That is, $c_{ij} = c_{ji}$ for all i,j $\in$ N. But the flow is not necessarily symmetric. Lastly, there are multipliers for collecting (from city to hub), transfer (from hub to hub) and distribution (from hub to city). These are given the names $\chi$, $\alpha$, $\delta$ respectively.
     
 Given these inputs, it is now the objective to minimalise the costs of sending all the packages by choosing the right hubs and connections between cities and hubs. We start by introducing a binary variable $e_{ik}$ with i,k $\in$ N as follows:
@@ -467,7 +634,7 @@ $$
 
 Note that $e_{ik}$ does not consider any connections between hubs. This is not needed however, as the connections between hubs are `implied' in the objective function. Additionally, with this variable we can also define what constitutes a hub in this ILP; namely a city k is a hub whenever $e_{kk} = 1$.
 
-Next, a means is required that indicates which path is valid for a package to take from a city i to j. A way to do this is by requiring that, for some i,j,k,l \in N, both $e_{ik} = 1$ and $e_{lj} = 1$. However, this would not be linear. Instead we introduce a helper variable $y_{ijkl}$ to mean the same as that:
+Next, a means is required that indicates which path is valid for a package to take from a city i to j. A way to do this is by requiring that, for some i,j,k,l $\in$ N, both $e_{ik} = 1$ and $e_{lj} = 1$. However, this would not be linear. Instead we introduce a helper variable $y_{ijkl}$ to mean the same as that:
 
 $$
 y_{ijkl} =
@@ -477,16 +644,27 @@ y_{ijkl} =
 \end{cases}
 $$
     
-To make this variable mean the same as what is desired, the following three constraints are introduced:
-    
-\begin{align*}
-    y_{ijkl} &\leq e_{ik} \\
-    y_{ijkl} &\leq e_{jl} \\
-    y_{ijkl} &\geq e_{ik} + e_{jl} - 1
-\end{align*}
-    
-The validity of these constraints is shown in table \ref{tab:Helper}.
+How this helper variable is made to be the same as what is desired will be done in the constraints.
+Using these variables, the objective function and constraints are as follows:
 
+    
+\begin{align}
+    min \, z &= \sum^N_{i=1}\sum^N_{j=1}\sum^N_{k=1}\sum^N_{l=1} w_{ij}(\chi c_{ik} + \alpha c_{kl} + \delta c_{lj})y_{ijkl} + \sum^N_{k=1} f_k e_{kk} \label{obj}\\
+    \sum^N_{k=1}e_{ik} &= 1 \quad\quad i \in N \label{C1}\\
+    e_{ik} & \leq e_{kk} \quad\quad i,k \in N \label{C2}\\
+    y_{ijkl} &\leq e_{ik} \quad\quad i,j,k,l \in N \label{C3}\\
+    y_{ijkl} &\leq e_{jl} \quad\quad i,j,k,l \in N \label{C4}\\
+    y_{ijkl} &\geq e_{ik} + e_{jl} - 1 \quad\quad i,j,k,l \in N \label{C5}\\
+    \sum^N_{k=1}e_{kk} &\geq 1 \quad\quad k \in N \label{C6}
+\end{align}
+
+The objective function (\ref{obj}) is constructed as follows: given a path from $i \rightarrow k \rightarrow l \rightarrow j$ with i,j,k,l $\in$ N and the relevant multipliers we get that sending one unit of flow over this path is $\chi c_{ik} + \alpha c_{kl} + \delta c_{lj}$. However, we want to send more than just one package. So, it is multiplied by the total flow between the sending city i and receiving city j, namely $w_{ij}$. To make sure that the chosen path is valid, that is city i is assigned to hub k and city j is assigned to hub l, it is also multiplied by $y_{ijkl}$. Finally, we sum over all the indexes i,j,k,l to get the total cost for sending packages.
+
+On top of that, there is also the costs of establishing hubs at certain cities. We multiply this cost for a certain city k $\in$ N by $e_{kk}$, since only hubs are connected to themselves. By summing over k the total costs for establishing hubs is calculated.
+
+The first constraint (\ref{C1}) is there to make sure that each city needs to be assigned to exactly one hub. Similarly, the second constraint (\ref{C2}) makes sure that a city i can only be assigned to a city k if city k itself is a hub.
+
+The next three constraints (\ref{C3}) (\ref{C4}) (\ref{C5}) have been made such that $y_{ijkl} = e_{ik}*e_{lj}$. The validity of this claim is shown in table \ref{tab:Helper}.
 
 \begin{table}[h]
 
@@ -532,29 +710,22 @@ $e_{ik}$ & $e_{jl} $ & constraints & $y_{ijkl}$\\
 \label{tab:Helper}
 \end{table}
 
-With this helper variable defined it is now possible to construct the objective function. First of all, the cost for a unit of flow sent along a certain path is needed. Given a path from $i \rightarrow k \rightarrow l \rightarrow j$ with i,j,k,l $\in$ N and the relevant multipliers we get that sending one unit of flow over this path is $\chi c_{ik} + \alpha c_{kl} + \delta c_{lj}$. However, we want to send more than just one package. So, it is multiplied by the total flow between the sending city i and receiving city j, namely $w_{ij}$. To make sure that the chosen path is valid, that is city i is assigned to hub k and city j is assigned to hub l, it is also multiplied by $y_{ijkl}$. Summing over i,j,k,l $\in$ N, the total costs for sending packages over the chosen hubs and connections is: 
-$$\sum^N_{i=1}\sum^N_{j=1}\sum^N_{k=1}\sum^N_{l=1} w_{ij}(\chi c_{ik} + \alpha c_{kl} + \delta c_{lj})y_{ijkl}$$
-
-On top of that, there is also the costs of establishing hubs at certain cities. We multiply this cost for a certain city k $\in$ N by $e_{kk}$, since only hubs are connected to themselves. Summing over k, this gives the total cost of establishing the hubs as:
-$$\sum^N_{k=1} f_k e_{kk}$$
-
-Combining this with the previous part and the fact that the objective function needs to be minimised we obtain that the objective function is:
-$$min \sum^N_{i=1}\sum^N_{j=1}\sum^N_{k=1}\sum^N_{l=1} w_{ij}(\chi c_{ik} + \alpha c_{kl} + \delta c_{lj})y_{ijkl} + \sum^N_{k=1} f_k e_{kk}$$
-
-Lastly, some additional constraints are introduced. Firstly, since every city needs to be assigned to exactly one hub, $\sum^N_k e_{ik} = 1$ for all i $\in$ N is introduced as a constraint. Additionally, the constraint $e_{ik} \leq e_{kk}$ for all i,k $\in$ N is set as a constraint as well. For the latter, when $e_{kk} = 0$, it is a city. Thus, there can be no other cities assigned to it, which that constraints makes sure of. When $e_{kk} = 1$, it is a hub, meaning that there can be a different city assigned to it, though it is not required. Finally, a constraint is introduced that requires there to be at least one hub, namely $\sum^N_k e_{kk} \geq 1$. With these constraints the ILP definition is finalised and it can now be used to calculate an optimal solution.
+Finally, the sixth constraint (\ref{C6}) makes it so that there is at least one hub in the final answer.
 
 \subsection{ILP result}
-The ILP model was implemented into Python using PuLP, with CPLEX as solver. The relevant data was imported from an excel file using Pandas. The full program can be found in Appendix \ref{ILPPyth}. After running the program it returned an optimal solution of 144.369. Interestingly, the hubs chosen by this program were 6, 8 and 14, the exact same ones as the result from the intuitive algorithm. However, that resulted in a cost of 144.532, which is a difference of 163.
+The ILP model was implemented into Python using PuLP, with CPLEX as solver. The relevant data was imported from an excel file using Pandas. The full program can be found in Appendix \ref{ILPPyth}. 
+\subsubsection{Result of the large data set}
+After running the program for the large data set it returned an optimal solution of €144.369. Interestingly, the hubs chosen by this program were 6, 8 and 14, the exact same ones as the result from the intuitive algorithm. However, that resulted in a cost of €144.532, which is a difference of 163.
 
-Upon closer inspection, it was discovered that one connection differed from the intuitive algorithm. In the ILP optimal solution, a graph of which can be found in figure \ref{ILPSol}, city 10 was connected to hub 14 instead of hub 6. The connections between cities 10 and 14 and between 10 and 6 cost the same, namely 9. So the difference in cost is not due to collection or distribution costs, rather it is due to the transfer costs of sending packages through hub 14 instead of 6. The similarity between the two results does suggest that the intuitive algorithm is relatively accurate.
+Upon closer inspection, it was discovered that one connection differed from the solution of the intuitive algorithm. In the ILP optimal solution, a graph of which can be found in figure \ref{ILPSol}, city 10 was connected to hub 14 instead of hub 6. The connections between cities 10 and 14 and between 10 and 6 cost the same, namely 9. So the difference in cost is not due to collection or distribution costs, rather it is due to the transfer costs of sending packages through hub 14 instead of 6. The similarity between the two results does suggest that the intuitive algorithm is relatively accurate.
 
 \begin{figure}[h]
 
 \centering
 \begin{tikzpicture}[main/.style = {draw, circle,minimum size=0.8cm}]
-\node[main] (6) {6};
-\node[main] (8) [below right=1.5cm of 6] {8};
-\node[main] (14) [below left=1.5cm of 6] {14};
+\node[main] (6) [fill = blue!20] {6};
+\node[main] (8) [below right=1.5cm of 6, fill = blue!20] {8};
+\node[main] (14) [below left=1.5cm of 6, fill = blue!20] {14};
 
 \node[main] (1) [above=of 6,xshift=-1.7cm,yshift=-1.7cm] {1};
 \node[main] (2) [above=of 6,xshift=-1.3cm,yshift=-0.9cm] {2};
@@ -592,8 +763,45 @@ Upon closer inspection, it was discovered that one connection differed from the 
 \draw[-] (15) -- (14);
 \draw[-,draw=red!80] (10-2) -- (14);
 \end{tikzpicture}
-\caption{A graph of the optimal ILP solution. The 10 coloured red indicates the result of the intuitive algoritm while the 10 coloured green indicates the result of the ILP solution.}
+\caption{\centering A graph of the optimal ILP solution for the large data set. The 10 coloured red indicates the result of the intuitive algorithm while the 10 coloured green indicates the result of the ILP solution.}
 \label{ILPSol}
+\end{figure}
+
+\subsubsection{Result of the small data set}
+After running the the program for the small data set it returned an optimal solution of €46.330. Cities 2, 4 and 6 were chosen by the program as hubs. Notably, these are the same cities that were chosen as hubs by the intuitive algorithm. In fact, the resulting optimal solution is exactly the same as well. The graph of this solution can be found in figure \ref{ILPSolSmall}. So, it appears that using the intuitive algorithm the best solution had already been found, reinforcing the accuracy of the intuitive algorithm.
+
+\begin{figure}[h]
+
+\centering
+\begin{tikzpicture}[main/.style = {draw, circle,minimum size=0.8cm}]
+\node[main] (6) [fill = blue!20] {6};
+\node[main] (2) [below right=1.5cm of 6, fill = blue!20] {2};
+\node[main] (4) [below left=1.5cm of 6, fill = blue!20] {4};
+
+\node[main] (1) [right=1cm of 2] {1};
+
+\node[main] (3) [above=of 6,xshift=-1.7cm,yshift=-1.7cm] {3};
+\node[main] (5) [above=of 6,xshift=-1.3cm,yshift=-0.9cm] {5};
+\node[main] (7) [above=of 6,xshift=-0.5cm,yshift=-0.5cm] {7};
+\node[main] (8) [above=of 6,xshift=0.5cm,yshift=-0.5cm] {8};
+\node[main] (9) [above=of 6,xshift=1.3cm,yshift=-0.9cm] {9};
+\node[main] (10) [above=of 6, xshift=1.7cm,yshift=-1.7cm] {10};
+
+\draw[-] (6) -- (4);
+\draw[-] (6) -- (2);
+\draw[-] (4) -- (2);
+
+\draw[-] (6) -- (3);
+\draw[-] (6) -- (5);
+\draw[-] (6) -- (7);
+\draw[-] (6) -- (8);
+\draw[-] (6) -- (9);
+\draw[-] (6) -- (10);
+
+\draw[-] (2) -- (1);
+\end{tikzpicture}
+\caption{A graph of the optimal ILP solution for the small data set}
+\label{ILPSolSmall}
 \end{figure}
 \newpage
 
@@ -612,11 +820,13 @@ This scenario is translated into the algorithm by letting all factors of moving 
             
              \begin{table}[h!]
                 \begin{center}
-                \begin{tabular}{|p{3cm}|p{3cm}|p{3cm}|}
+                \begin{tabular}{||c|c|c||}
                     \hline
-                    \multicolumn{3}{|c|}{Amount of times cities are used as hubs} \\
+                    \multicolumn{3}{||c||}{Amount of times cities are used as hubs} \\
+                    \hline
                     \hline
                     City used as hub & Using only collection cost & Using total cost\\
+                    \hline
                     \hline
                     1 &  5 & 4 \\
                     \hline
@@ -656,7 +866,7 @@ This scenario is translated into the algorithm by letting all factors of moving 
             
              \begin{table}[h!]
                 \begin{center}
-                    \begin{tabular}{ |p{3cm}|p{3cm}|p{4cm}|}
+                    \begin{tabular}{ |p{3cm}|p{4cm}|p{4cm}|}
                         \hline
                         \multicolumn{3}{|c|}{Cost and combination of hubs with certain input} \\
                         \hline
@@ -666,52 +876,55 @@ This scenario is translated into the algorithm by letting all factors of moving 
                         \hline
                         [10] & 76.1 | [10, 2, 14]   & 139.5 | [10, 2, 14] \\
                         \hline
-                        [9,10 ]& 88.4 | [6, 10, 2, 14] & 148.8 |  [9, 10, 2, 14]\\
+                        [9]& 88.4 | [2, 9,10, 14] & 151.3 |  [9, 10, 2, 14]\\
                         \hline
-                        [6, 14] &  66.6 | [6, 14]  &  131.7 | [6, 14] \\
+                        [2] &  111.8 | [2,3,5,9,10,14]  &  170.8 | [2,3,5,6,10,14] \\
                         \hline
-                        [6, 14, 8] & 75.6 | [2, 10, 14] & 136.3 | [6,14,8]  \\
+                        [6, 14, 8] & 75.6 | [6, 14,8] & 136.3 | [6,14,8]  \\
+                        \hline
+                        [6, 14] & 66.6| [6, 14] & 131.7 | [6,14]  \\
                         \hline
                     \end{tabular}
                 \end{center}
             \caption{Table of the amount of times each city is used as a hub in every combination}
-            \label{amount of times hubs are used in collection} 
+            \label{amount of times hubs are used in collection expanded} 
             \end{table}
             
-            This table shows that most likely turning cities 6 and 14 into hubs will result into a low cost. Moreover, cities 2, 10 and 8 also have a high probability of ending up in the final result.
+            This table shows that most likely turning cities 6 and 14 into hubs will result into a low cost. Moreover, the combination of 10, 2 and 14 also gives a relatively cost efficient result.
 
     
         \subsubsection{Algorithm used for transfers between hubs}
             The algorithm that was used in subsection \ref{sssec:num1} on page \pageref{sssec:num1} will be implemented for this situation (more realistic) where the packages are collected and distributed using a bus. We will illustrate this by using the large data assignment. 
 
             \begin{table}[h!]
-            \begin{tabular}{|p{3cm}|p{3cm}|p{3cm}|}
+            \begin{tabular}{||c|c|c||}
             \hline
             nodes that are hubs & flow of parcels to itself (last node) & Total cost (€ x 10^3) \\
             \hline
-            [14] &  181 & 404.3 \\
             \hline
-            [14,2]   & 39 & 282.4 \\
+            [14] &  181 & 165.4 \\
             \hline
-            [14,2,15] & 26 & 273.1 \\
+            [14,2]   & 39 & 144.5 \\
             \hline
-            [14,2,15,6]  & 18 & 228.9 \\
+            [14,2,15] & 26 & 150.7 \\
             \hline
-            [14,2,15,6,13] & 18 & 222.2\\
+            [14,2,15,6]  & 18 & 140.5 \\
             \hline
-            [14,2,15,6,13,4] & 11 & 213.6   \\
+            [14,2,15,6,13] & 18 & 147.4\\
             \hline
-            [14,2,15,6,13,4,3] & 9 & 214.9   \\
+            [14,2,15,6,13,4] & 11 & 155.4   \\
             \hline
-            [14,2,15,6,13,4,3,9] & 9 & 218.5    \\
+            [14,2,15,6,13,4,3] & 9 & 166.4   \\
             \hline
-            [14,2,15,6,13,4,3,9,7] & 9 & 222.9    \\
+            [14,2,15,6,13,4,3,9] & 9 & 178.6    \\
+            \hline
+            [14,2,15,6,13,4,3,9,7] & 9 & 189.6    \\
             \hline
             \end{tabular}
             \caption{Table of nodes that were used as hubs and the associated costs}
             \end{table}
 
-The cheapest situation here is where we have 6 hubs in nodes 2,4,6,13,14,15, the total cost in this situation is €213.621 which is €57086 more expensive than before. An explanation for this is that the packages are not sent on one go, but in two or more times, which would ultimately lead to more costs. There is also a big difference in the locations of the hubs. First there were 4 (2,6,14 and 15) hubs and now two extra hubs are being established. In the following chapters the other algorithms will be implemented and combined so that in the end an optimal situation arises.
+A solution would be to pick hubs 2,6,14 and 15 with a total cost of €140565. An explanation for this is that the packages are not sent on one go, but in two or more times, which would ultimately lead to more costs. There is no difference with the locations of the hubs in section \ref{sssec:num1}. In the following chapters the other algorithms will b3e implemented and combined so that in the end an optimal situation arises.
 
 \subsubsection{Algorithm used for distribution}
 The algorithm used for distribution cost minimisation for the addition to the problem is identical to the one in section \ref{Distribution}. The only modification is to the cost function. Running the algorithm based on distribution costs, given the change, results in table \ref{tab:DistAlgExp}. Again, the first column represents which city got chosen to add to the list of hubs and the costs have been expressed in thousands rounded to one decimal for readability.
@@ -803,8 +1016,47 @@ Once again, the algorithm is repeated but instead with a focus on the total cost
     \label{tab:DistAlgExp2}
 \end{table}
 
-\subsection{ILP result}
-(This part of the expanded algorithm is still being worked on)
+\subsubsection{Result of the combined algorithms}
+
+As in section \ref{sssec:num2} hubs will be established in cities 6 and 14. The same algorithm used in section \ref{sssec:num2} will be implemented to find the optimal solution. 
+
+\begin{table}[h]
+\begin{tabular}{||c |c||}
+\hline
+Nodes that are hubs & Total cost (€ x 10^3)\\
+\hline
+\hline
+[6,14] &  131.7 \\
+\hline
+[6,14,2]   & 133.2\\
+\hline
+[6,14,2,8] & 137.6 \\
+\hline
+[6,14,2,8,13]  & 144.4  \\
+\hline
+[6,14,2,8,13,15] & 152.5 \\
+\hline
+[6,14,2,8,13,15,12] & 161.1 \\
+\hline
+[6,14,2,8,13,15,12,5] & 170.0 \\
+\hline
+\end{tabular}
+\caption{Table of nodes that were used as hubs in the expanded algorithm}
+\end{table}
+
+The optimal solution that is found is when hubs are established in nodes 6 and 14 with a total cost of €131.668
+
+
+\subsection{Expanded ILP solver}
+Unfortunately, the attempt at an ILP solver for the expanded problem was unsuccessful. However, the implementation and the obtained result will be detailed below still.
+\subsection{Expanded ILP implementation}
+The expanded ILP implementation builds further upon the ILP implementation in section \ref{ILPimp}. First, we start by introducing 3 new variables:
+\begin{align}
+mc_{ij} &= 
+\end{align}
+
+$$min \, z &= \sum^N_{i=1}\sum^N_{j=1}\sum^N_{k=1}\sum^N_{l=1} w_{ij}(\chi c_{ik} + \alpha c_{kl} + \delta c_{lj})y_{ijkl}$$
+\subsection{Expanded ILP result}
 
 \subsection{Difference between the two methods}
 (This section is still being worked on)
@@ -822,7 +1074,8 @@ In conclusion, the intuitive algorithm gave a result which was only €163 away 
 By adding another element into the data set, the problem becomes more realistic. this is done by looking at the way packages are moved around. In this case the restrictions of the problem have been modified such that the packages are moved by busses which can hold up to 100 packages. Even in this expanded algorithm, it shows that the intuitive part assesses the problem quite well. 
 
 \newpage
-\section{Bibliography}
+\section*{Bibliography}
+\addcontentsline{toc}{section}{Bibliography}
 \begin{thebibliography}{9}
 
 \bibitem{Packages per bus}
@@ -836,7 +1089,117 @@ By adding another element into the data set, the problem becomes more realistic.
 \newpage
 
 \appendix
-\section{ILP definition}
+\section{Cost function Intuitive Algorithm}
+\url{https://github.com/Wessel201/Notes-Modelleren-B-20-04-2021}
+\label{CostFunction}
+\begin{verbatim}
+import pandas as pd 
+import matplotlib.pyplot as plt
+import math
+collection_factor = 1
+transfer_factor = 1
+distribution_factor = 1
+bus_capactity = 100
+
+file_name ='data_klein.xlsx'
+
+
+class parcel():
+    def __init__(self,file):
+        #Here the data is imported from the excel file and stored and variables to be used later
+        xls = pd.ExcelFile(file)
+        self.flow = pd.read_excel(xls, 'w')
+        self.flow = self.flow.transpose()
+        self.package_cost = pd.read_excel(xls, 'c')
+        self.package_cost = self.package_cost.transpose()
+        if file == 'Large.xlsx':
+            self.hub_cost =[13530] + list(pd.read_excel(xls, 'f')[13530])
+        else:
+            self.hub_cost =[4388] + list(pd.read_excel(xls, 'f')[4388])
+        self.cities = len(self.flow.columns)
+
+    def calculate_cost(self,hubs):
+		# hubs are given as input variable in the form of a list so eg. [1,2,5]
+        cost = 0
+        index = {} 
+        hubs = sorted(hubs)
+        flow_copy = self.flow.copy(deep=True)
+        flow_copy = flow_copy.drop(index = 'Unnamed: 0')
+        cost_copy = self.package_cost.copy(deep=True)
+        cost_copy = cost_copy.take([hub for hub in hubs])
+        # The following loop calculates the cost of collection and building of the hubs. 
+        for i in range(self.cities):
+            if i+1 in hubs:
+                #If statement checks if the hub is in the inputed if yes then the cost to built this hub is added to the total cost
+                index[i] = i+1
+                cost+= self.hub_cost[i]
+                continue
+            nearest_hub = cost_copy.loc[cost_copy[i] > 0 , i].idxmin()
+            #the nearest hub is determined by finding the hub that has the lowest collection cost for that city 
+            cost += cost_copy[i][nearest_hub]
+            flow_copy[i].sum()*math.ceil(flow_copy[i].sum()/bus_capactity)*collection_factor
+            #The amount of packages multiplied by the cost of collection of the nearest hub multiplied by the collection factor is added to the cost 
+            nearest_hub = nearest_hub 
+            index[i] = nearest_hub
+            #The city is linked to the hub 
+            flow_copy[nearest_hub-1] = flow_copy[i]+flow_copy[nearest_hub-1]
+            flow_copy = flow_copy.drop(columns = i)
+        for i in range(self.cities):
+            #in this loop the cost of transport and delivery is determined. 
+            flowss = list(flow_copy.iloc[i])
+            to_hub = index[i] - 1 
+            prices = list(cost_copy[to_hub])
+            total_packages = sum(flowss)
+            transfer_cost = sum([int(flowss[i])*int(prices[i]) for i in range(len(flowss))])
+            distribution_cost = self.package_cost[to_hub][i+1]*math.ceil(total_packages/bus_capactity)*distribution_factor*total_packages
+            cost+= distribution_cost + transfer_cost
+        return cost
+
+\end{verbatim}
+
+\section{Intuitive Algorithm Python implementation}
+Below are the 3 programs used to obtain the result of the intuitive algorithm. For each the cost function from Appendix \ref{CostFunction} is used, slightly modified where necessary.
+
+\subsection{Collection}
+\subsection{Transfer}
+\subsection{Distribution}
+As can be seen in line 1, this version uses the large data set. For the small data set, only the file name needs to be changed.
+\begin{verbatim}
+file_name = 'Large.xlsx'
+g = parcel(file_name)
+
+def next_lowest(g, hubs): #finds the next best hub to minimalise dist costs
+    low = 1e10
+    low_id = None
+    
+    for c in range(1,g.cities):
+        #print('low', low, low_id)
+        if c in hubs:   #checks if c is already a hub
+            continue
+        
+        else:           #calculates the cost of adding city c as hub
+            temp_hubs = sorted(hubs + [c])
+            #print(temp_hubs)
+            temp_cost = g.calculate_cost(temp_hubs)
+            #print('temp', temp_cost, c)
+            if temp_cost < low:     #compares to see if it's the lowest
+                low = temp_cost
+                low_id = c
+    return low, low_id
+
+
+cur_hubs = []
+res = []
+for _ in range(1, g.cities):
+    new_cost, new_hub = next_lowest(g, cur_hubs)
+    cur_hubs = sorted(cur_hubs + [new_hub])
+    res.append((new_cost, cur_hubs))
+
+print(res)
+\end{verbatim}
+\newpage
+
+\section{ILP solver}
 \label{ILPDef}
 \subsection*{Input}
 \begin{align*}
@@ -881,7 +1244,7 @@ y_{ijkl} &\geq e_{ik} + e_{jl} - 1 &i,j,k,l \in N \\
 \label{ILPPyth}
 This version of the implementation is specifically for the large data set. The implementation for the small data set is identical apart from some of the input.
 \begin{verbatim}
-    import pandas as pd
+import pandas as pd
 import pulp as p
 import numpy as np
 #Input
@@ -958,5 +1321,8 @@ res = Parcel.solve(solver)
 print("status:", res)
 print("OPT:", p.value(Parcel.objective))
 \end{verbatim}
+
+
+
 
 \end{document}
